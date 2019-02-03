@@ -1,0 +1,290 @@
+openapi: 3.0.0
+info:
+  description: A Simple Money Transfer API
+  title: Money Transfer
+  version: v1
+  contact: {}
+paths:
+  /accounts:
+    get:
+      summary: Get All Accounts
+      operationId: listAccounts
+      description: Get the accounts list.
+      responses:
+        '200':
+          description: Success response
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Accounts'
+      parameters: []
+    post:
+      summary: Creates A New Account
+      operationId: createAccount
+      description: Adds an account to the account's list.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+        description: The account to create.
+      responses:
+        '204':
+          description: Account succesfully created.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          description: Account couldn't have been created.
+        '500':
+          $ref: '#/components/responses/Standard500ErrorResponse'
+      parameters: []
+  '/accounts/{id}':
+    get:
+      summary: Get Account By Id
+      operationId: getAccount
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The account's id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success response
+        '404':
+          $ref: '#/components/responses/AccountNotFoundResponse'
+  '/accounts/{id}/transfers':
+    get:
+      summary: Get Account's Transfers
+      operationId: getAccountsTransfers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The account's id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success response
+        '404':
+          $ref: '#/components/responses/AccountNotFoundResponse'
+  /transfers:
+    get:
+      summary: Get All Transfers
+      operationId: listTransfers
+      description: Get the transfers list using search criteria.
+      responses:
+        '200':
+          description: Success response
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Transfers'
+      parameters: []
+    post:
+      summary: Creates A New Transfer
+      operationId: createTransfer
+      description: Create A Transfer From A Source Account To A Destination Account.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTransferRequest'
+        description: The transfer informations.
+      responses:
+        '204':
+          description: Transfer succesfully created.
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Transfer'
+        '400':
+          description: Transfer couldn't have been created.
+        '500':
+          $ref: '#/components/responses/Standard500ErrorResponse'
+      parameters: []
+  '/transfers/{id}':
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The transfer's id
+          schema:
+            type: string
+      summary: Get Transfer By Id
+      operationId: getTransfer
+      description: Get the transfer by it's id
+      responses:
+        '200':
+          description: Success response
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Transfer'
+        '404':
+          $ref: '#/components/responses/TransferNotFoundResponse'
+  '/transfers/{id}/execute':
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The transfer's id
+          schema:
+            type: string
+      summary: Execute A Transfer By Id
+      operationId: executeTransfer
+      description: 'Execute a transfer by it''s id, the state change to COMPLETED'
+      responses:
+        '200':
+          description: Success response
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Transfer'
+        '404':
+          $ref: '#/components/responses/TransferNotFoundResponse'
+  '/transfers/{id}/cancel':
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The transfer's id
+          schema:
+            type: string
+      summary: Cancel A Transfer By Id
+      operationId: cancelTransfer
+      description: 'Cancel a transfer by it''s id, the state change to CANCELED'
+      responses:
+        '200':
+          description: Success response
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Transfer'
+        '404':
+          $ref: '#/components/responses/TransferNotFoundResponse'
+servers:
+  - url: 'http://api.ipify.org/'
+components:
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      description: The account's id
+      schema:
+        type: string
+    pageSize:
+      name: pageSize
+      in: query
+      description: Number of accounts returned
+      schema:
+        type: integer
+    pageNumber:
+      name: pageNumber
+      in: query
+      description: Page number
+      schema:
+        type: integer
+  responses:
+    Standard500ErrorResponse:
+      description: An unexpected error occured.
+      content:
+        '*/*':
+          schema:
+            $ref: '#/components/schemas/Error'
+    AccountNotFoundResponse:
+      description: Account does not exist.
+    TransferNotFoundResponse:
+      description: Account does not exist.
+  schemas:
+    Account:
+      required:
+        - id
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        balance:
+          type: number
+          format: decimal
+        currency:
+          type: string
+        state:
+          type: string
+    Accounts:
+      type: array
+      items:
+        $ref: '#/components/schemas/Account'
+    Transfer:
+      required:
+        - id
+      properties:
+        id:
+          type: string
+        fromAccountId:
+          type: string
+        toAccountId:
+          type: string
+        amount:
+          type: number
+          format: decimal
+        currency:
+          type: string
+        state:
+          type: string
+        links:
+          $ref: '#/components/schemas/Link'
+    Transfers:
+      type: array
+      items:
+        $ref: '#/components/schemas/Transfer'
+    CreateTransferRequest:
+      properties:
+        requestId:
+          type: string
+        fromAccountId:
+          type: string
+        toAccountId:
+          type: string
+        amount:
+          type: number
+          format: decimal
+        currency:
+          type: string
+    CreateAccountRequest:
+      properties:
+        requestId:
+          type: string
+        name:
+          type: string
+        balance:
+          type: number
+          format: decimal
+        currency:
+          type: string
+    Link:
+      properties:
+        href:
+          type: string
+        rel:
+          type: string
+        method:
+          type: string
+    Error:
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+  links: {}
+  callbacks: {}
+security: []
