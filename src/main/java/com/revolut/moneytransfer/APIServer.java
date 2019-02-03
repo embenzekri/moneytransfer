@@ -1,5 +1,10 @@
 package com.revolut.moneytransfer;
 
+import com.revolut.moneytransfer.api.AccountAPIController;
+import com.revolut.moneytransfer.api.TransferAPIController;
+import com.revolut.moneytransfer.service.AccountService;
+import com.revolut.moneytransfer.service.TransferService;
+import com.revolut.moneytransfer.storage.InMemoryStorage;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -15,7 +20,8 @@ interface APIConstants {
 
 public class APIServer extends AbstractVerticle {
 
-    private APIController apiController = new APIController();
+    private TransferAPIController transferAPIController;
+    private AccountAPIController accountAPIController;
 
     public static void main(String[] args) {
         Vertx vertx = Vertx.vertx();
@@ -29,17 +35,22 @@ public class APIServer extends AbstractVerticle {
         OpenAPI3RouterFactory.create(vertx, OPEN_API_CONTRACT_URL, ar -> {
 
             if (ar.succeeded()) {
+
+                initializeServices();
+
                 OpenAPI3RouterFactory factory = ar.result();
 
-                factory.addHandlerByOperationId("listAccounts", apiController::listAccounts);
-                factory.addHandlerByOperationId("getAccount", apiController::getAccount);
-                factory.addHandlerByOperationId("createAccount", apiController::createAccount);
+                factory.addHandlerByOperationId("listAccounts", accountAPIController::listAccounts);
+                factory.addHandlerByOperationId("getAccount", accountAPIController::getAccount);
+                factory.addHandlerByOperationId("createAccount", accountAPIController::createAccount);
+                factory.addHandlerByOperationId("deactivateAccount", accountAPIController::deactivateAccount);
+                factory.addHandlerByOperationId("getAccountsTransfers", accountAPIController::listAccountsTransfers);
 
-                factory.addHandlerByOperationId("listTransfers", apiController::listTransfers);
-                factory.addHandlerByOperationId("executeTransfer", apiController::getTransfer);
-                factory.addHandlerByOperationId("createTransfer", apiController::createTransfer);
-                factory.addHandlerByOperationId("executeTransfer", apiController::executeTransfer);
-                factory.addHandlerByOperationId("cancelTransfer", apiController::cancelTransfer);
+                factory.addHandlerByOperationId("listTransfers", transferAPIController::listTransfers);
+                factory.addHandlerByOperationId("executeTransfer", transferAPIController::getTransfer);
+                factory.addHandlerByOperationId("createTransfer", transferAPIController::createTransfer);
+                factory.addHandlerByOperationId("executeTransfer", transferAPIController::executeTransfer);
+                factory.addHandlerByOperationId("cancelTransfer", transferAPIController::cancelTransfer);
 
                 Router router = factory.getRouter();
 
@@ -53,6 +64,15 @@ public class APIServer extends AbstractVerticle {
                 bootstrapFuture.fail(ar.cause());
             }
         });
+    }
+
+    private void initializeServices() {
+        InMemoryStorage storage = new InMemoryStorage();
+        storage.dummyData();
+        AccountService accountService = new AccountService(storage);
+        TransferService transferService = new TransferService(storage, accountService);
+        accountAPIController = new AccountAPIController(accountService, transferService);
+        transferAPIController = new TransferAPIController(accountService, transferService);
     }
 
 }

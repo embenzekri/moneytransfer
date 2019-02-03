@@ -4,12 +4,12 @@ import java.math.BigDecimal;
 
 public class AccountEntity extends Entity {
 
-    private String name = null;
-    private BigDecimal balance = null;
-    private String currency = null;
-    private String state = null;
+    private String name;
+    private BigDecimal balance;
+    private String currency;
+    private State state;
 
-    public AccountEntity(String id, String name, BigDecimal balance, String currency, String state) {
+    public AccountEntity(String id, String name, BigDecimal balance, String currency, State state) {
         super(id);
         this.name = name;
         this.balance = balance;
@@ -29,7 +29,7 @@ public class AccountEntity extends Entity {
         return currency;
     }
 
-    public String getState() {
+    public State getState() {
         return state;
     }
 
@@ -41,4 +41,14 @@ public class AccountEntity extends Entity {
     public AccountEntity debit(BigDecimal amount) {
         return new AccountEntity(getId(), name, balance.subtract(amount), currency, state);
     }
+
+    public AccountEntity deactivate() {
+        return new AccountEntity(getId(), name, balance, currency, State.INACTIVE);
+    }
+
+    public enum State {
+        ACTIVE, INACTIVE
+    }
 }
+
+

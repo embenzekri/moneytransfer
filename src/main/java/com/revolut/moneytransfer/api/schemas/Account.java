@@ -1,4 +1,4 @@
-package com.revolut.moneytransfer.model;
+package com.revolut.moneytransfer.api.schemas;
 
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -6,24 +6,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 
 @JsonInclude(JsonInclude.Include.NON_NULL) 
-public class Transfer   {
+public class Account   {
   
   private String id = null;
-  private String fromAccountId = null;
-  private String toAccountId = null;
-  private BigDecimal amount = null;
+  private String name = null;
+  private BigDecimal balance = null;
   private String currency = null;
   private String state = null;
 
-  public Transfer () {
+  public Account () {
 
   }
 
-  public Transfer (String id, String fromAccountId, String toAccountId, BigDecimal amount, String currency, String state) {
+  public Account (String id, String name, BigDecimal balance, String currency, String state) {
     this.id = id;
-    this.fromAccountId = fromAccountId;
-    this.toAccountId = toAccountId;
-    this.amount = amount;
+    this.name = name;
+    this.balance = balance;
     this.currency = currency;
     this.state = state;
   }
@@ -38,30 +36,21 @@ public class Transfer   {
   }
 
     
-  @JsonProperty("fromAccountId")
-  public String getFromAccountId() {
-    return fromAccountId;
+  @JsonProperty("name")
+  public String getName() {
+    return name;
   }
-  public void setFromAccountId(String fromAccountId) {
-    this.fromAccountId = fromAccountId;
-  }
-
-    
-  @JsonProperty("toAccountId")
-  public String getToAccountId() {
-    return toAccountId;
-  }
-  public void setToAccountId(String toAccountId) {
-    this.toAccountId = toAccountId;
+  public void setName(String name) {
+    this.name = name;
   }
 
     
-  @JsonProperty("amount")
-  public BigDecimal getAmount() {
-    return amount;
+  @JsonProperty("balance")
+  public BigDecimal getBalance() {
+    return balance;
   }
-  public void setAmount(BigDecimal amount) {
-    this.amount = amount;
+  public void setBalance(BigDecimal balance) {
+    this.balance = balance;
   }
 
     
@@ -91,29 +80,27 @@ public class Transfer   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Transfer transfer = (Transfer) o;
-    return Objects.equals(id, transfer.id) &&
-        Objects.equals(fromAccountId, transfer.fromAccountId) &&
-        Objects.equals(toAccountId, transfer.toAccountId) &&
-        Objects.equals(amount, transfer.amount) &&
-        Objects.equals(currency, transfer.currency) &&
-        Objects.equals(state, transfer.state);
+    Account account = (Account) o;
+    return Objects.equals(id, account.id) &&
+        Objects.equals(name, account.name) &&
+        Objects.equals(balance, account.balance) &&
+        Objects.equals(currency, account.currency) &&
+        Objects.equals(state, account.state);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, fromAccountId, toAccountId, amount, currency, state);
+    return Objects.hash(id, name, balance, currency, state);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Transfer {\n");
+    sb.append("class Account {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    fromAccountId: ").append(toIndentedString(fromAccountId)).append("\n");
-    sb.append("    toAccountId: ").append(toIndentedString(toAccountId)).append("\n");
-    sb.append("    amount: ").append(toIndentedString(amount)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    balance: ").append(toIndentedString(balance)).append("\n");
     sb.append("    currency: ").append(toIndentedString(currency)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("}");

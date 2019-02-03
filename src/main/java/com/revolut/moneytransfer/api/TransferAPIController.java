@@ -1,7 +1,11 @@
-package com.revolut.moneytransfer;
+package com.revolut.moneytransfer.api;
 
-import com.revolut.moneytransfer.model.*;
-import com.revolut.moneytransfer.model.Error;
+import com.revolut.moneytransfer.api.schemas.Account;
+import com.revolut.moneytransfer.api.schemas.CreateTransferRequest;
+import com.revolut.moneytransfer.api.schemas.Error;
+import com.revolut.moneytransfer.api.schemas.Transfer;
+import com.revolut.moneytransfer.entity.AccountEntity;
+import com.revolut.moneytransfer.entity.TransferEntity;
 import com.revolut.moneytransfer.service.AccountService;
 import com.revolut.moneytransfer.service.TransferService;
 import io.vertx.core.json.Json;
@@ -10,33 +14,13 @@ import io.vertx.ext.web.api.RequestParameters;
 
 import java.util.Optional;
 
-public class APIController {
-    private AccountService accountService = new AccountService();
-    private TransferService transferService = new TransferService();
+public class TransferAPIController {
+    private AccountService accountService;
+    private TransferService transferService;
 
-    public void listAccounts(RoutingContext routingContext) {
-        successfulResponse(routingContext, accountService.listAccounts());
-    }
-
-    public void getAccount(RoutingContext routingContext) {
-        String accountId = routingContext.pathParam("id");
-        Optional<Account> account = accountService.getAccount(accountId);
-        if (!account.isPresent()) {
-            routingContext
-                    .response()
-                    .setStatusCode(404)
-                    .end();
-        } else {
-            successfulResponse(routingContext, account);
-        }
-    }
-
-    public void createAccount(RoutingContext routingContext) {
-        RequestParameters params = routingContext.get("parsedParameters");
-
-        CreateAccountRequest createAccountRequest = params.body().getJsonObject().mapTo(CreateAccountRequest.class);
-
-        successfulResponse(routingContext, accountService.createAccount(createAccountRequest));
+    public TransferAPIController(AccountService accountService, TransferService transferService) {
+        this.accountService = accountService;
+        this.transferService = transferService;
     }
 
     public void listTransfers(RoutingContext routingContext) {
@@ -47,8 +31,6 @@ public class APIController {
         RequestParameters params = routingContext.get("parsedParameters");
 
         CreateTransferRequest createTransferRequest = params.body().getJsonObject().mapTo(CreateTransferRequest.class);
-
-        Error error = new Error("BUSINESS", "");
 
         successfulResponse(routingContext, transferService.createTransfer(createTransferRequest));
     }
@@ -99,5 +81,10 @@ public class APIController {
                 .response()
                 .setStatusCode(200)
                 .end(Json.encodePrettily(jsonObject));
+    }
+
+
+    public Transfer convertTransfer(TransferEntity transferEntity) {
+        return new Transfer(transferEntity.getId(), transferEntity.getFromAccountId(), transferEntity.getToAccountId(), transferEntity.getAmount(), transferEntity.getCurrency(), transferEntity.getState().name());
     }
 }

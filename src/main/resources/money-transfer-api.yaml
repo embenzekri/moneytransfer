@@ -56,6 +56,22 @@ paths:
           description: Success response
         '404':
           $ref: '#/components/responses/AccountNotFoundResponse'
+  '/accounts/{id}/deactivate':
+    get:
+      summary: Deactivate Account
+      operationId: deactivateAccount
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The account's id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success response
+        '404':
+          $ref: '#/components/responses/AccountNotFoundResponse'
   '/accounts/{id}/transfers':
     get:
       summary: Get Account's Transfers

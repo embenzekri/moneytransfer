@@ -10,4 +10,9 @@ public class Entity {
     public String getId() {
         return id;
     }
+
+    public boolean matchId(String externalId) {
+
+        return this.id.equals(externalId) || this.id.contains(externalId);
+    }
 }

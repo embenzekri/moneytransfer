@@ -1,4 +1,4 @@
-package com.revolut.moneytransfer.model;
+package com.revolut.moneytransfer.api.schemas;
 
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -6,33 +6,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 
 @JsonInclude(JsonInclude.Include.NON_NULL) 
-public class Account   {
+public class CreateAccountRequest   {
   
-  private String id = null;
   private String name = null;
   private BigDecimal balance = null;
   private String currency = null;
-  private String state = null;
 
-  public Account () {
+  public CreateAccountRequest () {
 
   }
 
-  public Account (String id, String name, BigDecimal balance, String currency, String state) {
-    this.id = id;
+  public CreateAccountRequest (String name, BigDecimal balance, String currency) {
     this.name = name;
     this.balance = balance;
     this.currency = currency;
-    this.state = state;
-  }
-
-    
-  @JsonProperty("id")
-  public String getId() {
-    return id;
-  }
-  public void setId(String id) {
-    this.id = id;
   }
 
     
@@ -62,15 +49,6 @@ public class Account   {
     this.currency = currency;
   }
 
-    
-  @JsonProperty("state")
-  public String getState() {
-    return state;
-  }
-  public void setState(String state) {
-    this.state = state;
-  }
-
 
   @Override
   public boolean equals(Object o) {
@@ -80,29 +58,25 @@ public class Account   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Account account = (Account) o;
-    return Objects.equals(id, account.id) &&
-        Objects.equals(name, account.name) &&
-        Objects.equals(balance, account.balance) &&
-        Objects.equals(currency, account.currency) &&
-        Objects.equals(state, account.state);
+    CreateAccountRequest createAccountRequest = (CreateAccountRequest) o;
+    return Objects.equals(name, createAccountRequest.name) &&
+        Objects.equals(balance, createAccountRequest.balance) &&
+        Objects.equals(currency, createAccountRequest.currency);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, balance, currency, state);
+    return Objects.hash(name, balance, currency);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Account {\n");
+    sb.append("class CreateAccountRequest {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    balance: ").append(toIndentedString(balance)).append("\n");
     sb.append("    currency: ").append(toIndentedString(currency)).append("\n");
-    sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("}");
     return sb.toString();
   }

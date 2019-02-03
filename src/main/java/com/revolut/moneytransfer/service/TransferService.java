@@ -1,35 +1,51 @@
 package com.revolut.moneytransfer.service;
 
-import com.revolut.moneytransfer.model.Account;
-import com.revolut.moneytransfer.model.CreateTransferRequest;
-import com.revolut.moneytransfer.model.Transfer;
-import com.revolut.moneytransfer.model.Transfers;
+import com.revolut.moneytransfer.entity.AccountEntity;
+import com.revolut.moneytransfer.entity.TransferEntity;
+import com.revolut.moneytransfer.api.schemas.CreateTransferRequest;
+import com.revolut.moneytransfer.api.schemas.Transfer;
+import com.revolut.moneytransfer.api.schemas.Transfers;
 import com.revolut.moneytransfer.service.error.BusinessException;
+import com.revolut.moneytransfer.storage.Storage;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+
+import static com.revolut.moneytransfer.storage.Storage.EntityName.TRANSFER;
 
 public class TransferService {
     private IDGenerator idGenerator = new IDGenerator();
     private Transfers transferList = new Transfers();
-    private AccountService accountService = new AccountService();
+    private Storage storage;
+    private AccountService accountService;
 
-    public Transfers listTransfers() {
-        return transferList;
+    public TransferService(Storage storage, AccountService accountService) {
+        this.storage = storage;
+        this.accountService = accountService;
+    }
+
+    public List<TransferEntity> listTransfers() {
+        return storage.getAll(TRANSFER);
     }
 
     public Transfer createTransfer(CreateTransferRequest request) {
-        Optional<Account> fromAccount = accountService.getAccount(request.getFromAccountId());
-        Optional<Account> toAccount = accountService.getAccount(request.getToAccountId());
+        Optional<AccountEntity> fromAccount = accountService.getAccount(request.getFromAccountId());
+        Optional<AccountEntity> toAccount = accountService.getAccount(request.getToAccountId());
         if (!fromAccount.isPresent() || !toAccount.isPresent()) {
             throw new BusinessException("Account not found exception");
         }
-        if (accountService.debit(fromAccount.get(), request.getAmount()) && accountService.credit(toAccount.get(), request.getAmount())) {
+        try {
+            AccountEntity debitedAccount = fromAccount.get().debit(request.getAmount());
+            AccountEntity creditedAccount = toAccount.get().credit(request.getAmount());
+            accountService.save(debitedAccount);
+            accountService.save(creditedAccount);
             Transfer transfer = new Transfer(idGenerator.generateTransferId(), request.getFromAccountId(), request.getToAccountId(), request.getAmount(), request.getCurrency(), "PENDING");
             transferList.add(transfer);
             return transfer;
+        } catch (Exception exception) {
+            throw new BusinessException("Impossible to transfer money between accounts");
         }
-
-        throw new BusinessException("Impossible to create a transfer");
     }
 
     public Optional<Transfer> getTransfer(String transferId) {
@@ -51,5 +67,13 @@ public class TransferService {
         Optional<Transfer> transfer = getTransfer(transferId);
         transfer.get().setState("CANCELED");
         return transfer.get();
+    }
+
+    public List<Transfer> listTransfersByAccount(String accountId) {
+        Optional<AccountEntity> account = accountService.getAccount(accountId);
+        if (account.isPresent()) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>();
     }
 }

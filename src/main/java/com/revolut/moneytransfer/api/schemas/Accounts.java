@@ -1,4 +1,4 @@
-package com.revolut.moneytransfer.model;
+package com.revolut.moneytransfer.api.schemas;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Transfers extends ArrayList<Transfer> {
+public class Accounts extends ArrayList<Account> {
 
 
-    public Transfers() {
+    public Accounts() {
     }
 
 
@@ -21,7 +21,7 @@ public class Transfers extends ArrayList<Transfer> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Transfers transfers = (Transfers) o;
+        Accounts accounts = (Accounts) o;
         return true;
     }
 
@@ -33,7 +33,7 @@ public class Transfers extends ArrayList<Transfer> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("class Transfers {\n");
+        sb.append("class Accounts {\n");
         sb.append("    ").append(toIndentedString(super.toString())).append("\n");
         sb.append("}");
         return sb.toString();

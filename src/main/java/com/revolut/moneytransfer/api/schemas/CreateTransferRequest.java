@@ -1,4 +1,4 @@
-package com.revolut.moneytransfer.model;
+package com.revolut.moneytransfer.api.schemas;
 
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonInclude;
