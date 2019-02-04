@@ -1,5 +1,7 @@
 package com.revolut.moneytransfer.business.entity;
 
+import com.revolut.moneytransfer.business.service.IDGenerator;
+
 import java.math.BigDecimal;
 
 public class AccountEntity extends Entity {
@@ -8,6 +10,10 @@ public class AccountEntity extends Entity {
     private BigDecimal balance;
     private String currency;
     private State state;
+
+    public AccountEntity(String name, BigDecimal balance, String currency) {
+        this(IDGenerator.generateAccountId(), name, balance, currency, State.ACTIVE);
+    }
 
     public AccountEntity(String id, String name, BigDecimal balance, String currency, State state) {
         super(id);
@@ -43,6 +49,10 @@ public class AccountEntity extends Entity {
 
     public AccountEntity deactivate() {
         return new AccountEntity(getId(), name, balance, currency, State.INACTIVE);
+    }
+
+    public boolean isActive() {
+        return state.equals(State.ACTIVE);
     }
 
     public enum State {

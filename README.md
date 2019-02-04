@@ -5,12 +5,12 @@ Lightweight and simple REST API for money transfer between accounts
 Contents
 --------
 - [Features](#features)
-- [Dependencies](#dependencies)
+- [Technologies](#Technologies)
 - [Building and running application](#building-and-running-application)
 - [Endpoints](#endpoints)
 - [Architecture](#Architecture)
 - [Tests](#tests)
-- [Code Quality](#static-code-analysis)
+- [Code Quality](#code-quality)
 
 Features
 --------
@@ -25,7 +25,7 @@ Features
 
 
 
-Dependencies
+Technologies
 ----------
 
 The project depends on the following technologies:
@@ -52,14 +52,19 @@ Server will start running on port `8080`
 
 Endpoints
 ---------
-The endpoints can be viewed and tested using the swagger-ui, available at [http://localhost:8080/].
-The OpenAPI v3 specification file is located in src/resources/money-transfer-api.yaml
+The endpoints can be viewed and tested using the swagger-ui, available at [http://localhost:8080](http://localhost:8080/).
+
+The OpenAPI v3 specification file is located in `src/resources/money-transfer-api.yaml`
 
 Architecture
 ------------
 The project is inspired by the Clean Architecture, where:
  - the business package contains the Core Business Logic.
  - the api + storage packages represents the Interfaces / Adapters containing the data storage and the REST API.
+
+The implementation is thread safe, thanks to vert.x concurrency model, there is one verticle, the APIServer which will always run in the same thread.
+
+The business entities are also made immutable to reinforce consistency and thread safety.
 
 **One important note: This is not 100% correctly implemented for the aim of simplicity.**
 
@@ -71,7 +76,7 @@ The vertx-web-api-contract allows to use OpenApi 3 specification directly inside
 Tests
 -----
 
-The REST Assured **integration tests** can be executed using:
+The **integration tests** are writen using JUnit and REST Assured, and can be executed using:
 
 ```
 mvn test
@@ -83,3 +88,8 @@ Code quality
 ----------
 
 The project is using the Intellij's default code styling.
+
+Intentionnaly missing
+-------
+
+

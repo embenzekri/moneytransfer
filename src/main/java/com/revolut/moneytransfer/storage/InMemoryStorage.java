@@ -27,7 +27,7 @@ public class InMemoryStorage implements Storage {
 
         Set<Entity> transferList = new HashSet<>();
         transferList.add(new TransferEntity("/transfers/467c34aa-cef8-bdef-8e7e-1er08c2901e90", account1Id, account2Id, new BigDecimal(1000), "EUR", PENDING));
-        transferList.add(new TransferEntity("/transfers/816c2a88-7205-4a3b-905b-048af106847d", account1Id, account3Id, new BigDecimal(2000), "EUR", COMPLETED));
+        transferList.add(new TransferEntity("/transfers/816c2a88-7205-4a3b-905b-048af106847d", account1Id, account3Id, new BigDecimal(10000), "EUR", PENDING));
         data.put(EntityName.TRANSFER, transferList);
     }
 

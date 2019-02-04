@@ -4,11 +4,11 @@ import java.util.UUID;
 
 public class IDGenerator {
 
-    public String generateAccountId() {
+    public static String generateAccountId() {
         return "/accounts/" + UUID.randomUUID().toString();
     }
 
-    public String generateTransferId() {
+    public static String generateTransferId() {
         return "/transfers/" + UUID.randomUUID().toString();
     }
 

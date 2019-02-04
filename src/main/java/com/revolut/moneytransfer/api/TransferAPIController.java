@@ -5,6 +5,7 @@ import com.revolut.moneytransfer.api.schemas.Link;
 import com.revolut.moneytransfer.api.schemas.Transfer;
 import com.revolut.moneytransfer.business.entity.TransferEntity;
 import com.revolut.moneytransfer.business.service.TransferService;
+import com.revolut.moneytransfer.business.service.error.BusinessException;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.api.RequestParameters;
@@ -13,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.revolut.moneytransfer.business.service.error.BusinessFailure.TRANSFER_NOT_FOUND;
 
 public class TransferAPIController {
     private TransferService transferService;
@@ -50,14 +53,14 @@ public class TransferAPIController {
         }
     }
 
-    public void executeTransfer(RoutingContext routingContext) {
+    public Transfer executeTransfer(RoutingContext routingContext) {
         String transferId = routingContext.pathParam("id");
         Optional<TransferEntity> transfer = transferService.getTransfer(transferId);
         if (!transfer.isPresent()) {
-            routingContext.response().setStatusCode(404).end();
+            throw new BusinessException(TRANSFER_NOT_FOUND);
         } else {
             TransferEntity executedTransfer = transferService.executeTransfer(transferId);
-            successfulResponse(routingContext, executedTransfer);
+            return convertTransfer(executedTransfer);
         }
     }
 
@@ -65,11 +68,11 @@ public class TransferAPIController {
         String transferId = routingContext.pathParam("id");
         Optional<TransferEntity> transfer = transferService.getTransfer(transferId);
         if (!transfer.isPresent()) {
-            routingContext.response().setStatusCode(404).end();
+            throw new BusinessException(TRANSFER_NOT_FOUND);
         } else {
             Optional<TransferEntity> executedTransfer = transferService.cancelTransfer(transferId);
             if (!executedTransfer.isPresent()) {
-                routingContext.response().setStatusCode(404).end();
+                throw new BusinessException(TRANSFER_NOT_FOUND);
             } else {
                 successfulResponse(routingContext, convertTransfer(executedTransfer.get()));
             }

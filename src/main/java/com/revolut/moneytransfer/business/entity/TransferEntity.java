@@ -1,10 +1,10 @@
 package com.revolut.moneytransfer.business.entity;
 
+import com.revolut.moneytransfer.business.service.IDGenerator;
+
 import java.math.BigDecimal;
 
-import static com.revolut.moneytransfer.business.entity.TransferEntity.State.CANCELED;
-import static com.revolut.moneytransfer.business.entity.TransferEntity.State.COMPLETED;
-import static com.revolut.moneytransfer.business.entity.TransferEntity.State.FAILED;
+import static com.revolut.moneytransfer.business.entity.TransferEntity.State.*;
 
 public class TransferEntity extends Entity {
 
@@ -13,6 +13,10 @@ public class TransferEntity extends Entity {
     private BigDecimal amount;
     private String currency;
     private State state;
+
+    public TransferEntity(String fromAccountId, String toAccountId, BigDecimal amount, String currency) {
+        this(IDGenerator.generateTransferId(), fromAccountId, toAccountId, amount, currency, State.PENDING);
+    }
 
     public TransferEntity(String id, String fromAccountId, String toAccountId, BigDecimal amount, String currency, State state) {
         super(id);

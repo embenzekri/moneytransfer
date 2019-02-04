@@ -1,17 +1,15 @@
 package com.revolut.moneytransfer.business.service;
 
-import com.revolut.moneytransfer.business.entity.AccountEntity;
 import com.revolut.moneytransfer.api.schemas.CreateAccountRequest;
+import com.revolut.moneytransfer.business.entity.AccountEntity;
 import com.revolut.moneytransfer.storage.Storage;
 
 import java.util.List;
 import java.util.Optional;
 
-import static com.revolut.moneytransfer.business.entity.AccountEntity.State.ACTIVE;
 import static com.revolut.moneytransfer.storage.Storage.EntityName.ACCOUNT;
 
 public class AccountService {
-    private IDGenerator idGenerator = new IDGenerator();
     private Storage storage;
 
     public AccountService(Storage storage) {
@@ -23,7 +21,7 @@ public class AccountService {
     }
 
     public AccountEntity createAccount(CreateAccountRequest request) {
-        AccountEntity accountEntity = new AccountEntity(idGenerator.generateAccountId(), request.getName(), request.getBalance(), request.getCurrency(), ACTIVE);
+        AccountEntity accountEntity = new AccountEntity(request.getName(), request.getBalance(), request.getCurrency());
         return storage.save(ACCOUNT, accountEntity);
     }
 

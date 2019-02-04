@@ -4,6 +4,7 @@ import com.revolut.moneytransfer.api.schemas.CreateTransferRequest;
 import com.revolut.moneytransfer.business.entity.AccountEntity;
 import com.revolut.moneytransfer.business.entity.TransferEntity;
 import com.revolut.moneytransfer.business.service.error.BusinessException;
+import com.revolut.moneytransfer.business.service.error.TechnicalException;
 import com.revolut.moneytransfer.storage.Storage;
 
 import java.util.ArrayList;
@@ -12,10 +13,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.revolut.moneytransfer.business.entity.TransferEntity.State.PENDING;
+import static com.revolut.moneytransfer.business.service.error.BusinessFailure.*;
 import static com.revolut.moneytransfer.storage.Storage.EntityName.TRANSFER;
 
 public class TransferService {
-    private IDGenerator idGenerator = new IDGenerator();
     private Storage storage;
     private AccountService accountService;
 
@@ -32,9 +33,9 @@ public class TransferService {
         Optional<AccountEntity> fromAccount = accountService.getAccount(request.getFromAccountId());
         Optional<AccountEntity> toAccount = accountService.getAccount(request.getToAccountId());
         if (!fromAccount.isPresent() || !toAccount.isPresent()) {
-            throw new BusinessException("Account not found");
+            throw new BusinessException(ACCOUNT_NOT_FOUND);
         }
-        return storage.save(TRANSFER, new TransferEntity(idGenerator.generateTransferId(), request.getFromAccountId(), request.getToAccountId(), request.getAmount(), request.getCurrency(), PENDING));
+        return storage.save(TRANSFER, new TransferEntity(request.getFromAccountId(), request.getToAccountId(), request.getAmount(), request.getCurrency()));
     }
 
     public Optional<TransferEntity> getTransfer(String transferId) {
@@ -44,26 +45,39 @@ public class TransferService {
     public TransferEntity executeTransfer(String transferId) {
         Optional<TransferEntity> transfer = getTransfer(transferId);
         if (!transfer.isPresent()) {
-            throw new BusinessException("Account not found");
+            throw new BusinessException(ACCOUNT_NOT_FOUND);
         }
         Optional<AccountEntity> fromAccount = accountService.getAccount(transfer.get().getFromAccountId());
         Optional<AccountEntity> toAccount = accountService.getAccount(transfer.get().getToAccountId());
         if (!fromAccount.isPresent() || !toAccount.isPresent()) {
-            throw new BusinessException("Account not found exception");
+            throw new BusinessException(ACCOUNT_NOT_FOUND);
+        }
+        if (!fromAccount.get().isActive() || !toAccount.get().isActive()) {
+            throw new BusinessException(ACCOUNT_STATE_INVALID);
+        }
+        if (fromAccount.get().getBalance().subtract(transfer.get().getAmount()).intValue() < 0) {
+            throw new BusinessException(TRANSFER_AMOUNT_EXCEEDED);
         }
         try {
-            AccountEntity debitedAccount = fromAccount.get().debit(transfer.get().getAmount());
-            AccountEntity creditedAccount = toAccount.get().credit(transfer.get().getAmount());
-            accountService.save(debitedAccount);
-            accountService.save(creditedAccount);
-            return storage.save(TRANSFER, transfer.get().executed());
+            return doExecuteTransfer(transfer.get(), fromAccount.get(), toAccount.get());
         } catch (RuntimeException exception) {
-            //Rollback transaction and set transfer to failed
-            accountService.save(fromAccount.get());
-            accountService.save(toAccount.get());
-            storage.save(TRANSFER, transfer.get().failed());
-            throw new BusinessException("Impossible to transfer money between accounts", exception);
+            rollbackTransfer(transfer.get(), fromAccount.get(), toAccount.get());
+            throw new TechnicalException("Impossible to transfer money between accounts", exception);
         }
+    }
+
+    private void rollbackTransfer(TransferEntity transfer, AccountEntity fromAccount, AccountEntity toAccount) {
+        accountService.save(fromAccount);
+        accountService.save(toAccount);
+        storage.save(TRANSFER, transfer.failed());
+    }
+
+    private TransferEntity doExecuteTransfer(TransferEntity transfer, AccountEntity fromAccount, AccountEntity toAccount) {
+        AccountEntity debitedAccount = fromAccount.debit(transfer.getAmount());
+        AccountEntity creditedAccount = toAccount.credit(transfer.getAmount());
+        accountService.save(debitedAccount);
+        accountService.save(creditedAccount);
+        return storage.save(TRANSFER, transfer.executed());
     }
 
     public Optional<TransferEntity> cancelTransfer(String transferId) {

@@ -5,7 +5,7 @@
     "title": "Money Transfer",
     "version": "v1"
   },
-  "host": "localhost:8080",
+  "host": "localhost:8080/v1",
   "schemes": [
     "http"
   ],

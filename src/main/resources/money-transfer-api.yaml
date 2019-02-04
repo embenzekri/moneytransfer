@@ -14,7 +14,7 @@ paths:
         '200':
           description: Success response
           content:
-            '*/*':
+            'application/json':
               schema:
                 $ref: '#/components/schemas/Accounts'
       parameters: []
@@ -32,7 +32,7 @@ paths:
         '204':
           description: Account succesfully created.
           content:
-            '*/*':
+            'application/json':
               schema:
                 $ref: '#/components/schemas/Account'
         '400':
@@ -97,7 +97,7 @@ paths:
         '200':
           description: Success response
           content:
-            '*/*':
+            'application/json':
               schema:
                 $ref: '#/components/schemas/Transfers'
       parameters: []
@@ -115,7 +115,7 @@ paths:
         '204':
           description: Transfer succesfully created.
           content:
-            '*/*':
+            'application/json':
               schema:
                 $ref: '#/components/schemas/Transfer'
         '400':
@@ -139,7 +139,7 @@ paths:
         '200':
           description: Success response
           content:
-            '*/*':
+            'application/json':
               schema:
                 $ref: '#/components/schemas/Transfer'
         '404':
@@ -160,7 +160,7 @@ paths:
         '200':
           description: Success response
           content:
-            '*/*':
+            'application/json':
               schema:
                 $ref: '#/components/schemas/Transfer'
         '404':
@@ -181,13 +181,13 @@ paths:
         '200':
           description: Success response
           content:
-            '*/*':
+            'application/json':
               schema:
                 $ref: '#/components/schemas/Transfer'
         '404':
           $ref: '#/components/responses/TransferNotFoundResponse'
 servers:
-  - url: 'http://localhost:8080/'
+  - url: 'http://localhost:8080/v1'
 components:
   parameters:
     id:
@@ -213,7 +213,7 @@ components:
     Standard500ErrorResponse:
       description: An unexpected error occured.
       content:
-        '*/*':
+        'application/json':
           schema:
             $ref: '#/components/schemas/Error'
     AccountNotFoundResponse:
