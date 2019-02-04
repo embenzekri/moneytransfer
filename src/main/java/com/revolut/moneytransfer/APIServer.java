@@ -11,6 +11,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
+import io.vertx.ext.web.handler.StaticHandler;
 
 import static com.revolut.moneytransfer.APIConstants.OPEN_API_CONTRACT_URL;
 
@@ -27,7 +28,6 @@ public class APIServer extends AbstractVerticle {
         Vertx vertx = Vertx.vertx();
         vertx.deployVerticle(new APIServer());
     }
-
 
     @Override
     public void start(final Future<Void> bootstrapFuture) throws Exception {
@@ -53,7 +53,7 @@ public class APIServer extends AbstractVerticle {
                 factory.addHandlerByOperationId("cancelTransfer", transferAPIController::cancelTransfer);
 
                 Router router = factory.getRouter();
-
+                router.route("/*").handler(StaticHandler.create());
                 vertx.createHttpServer(new HttpServerOptions()
                         .setPort(8080))
                         .requestHandler(router::accept)

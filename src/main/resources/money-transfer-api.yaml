@@ -57,7 +57,7 @@ paths:
         '404':
           $ref: '#/components/responses/AccountNotFoundResponse'
   '/accounts/{id}/deactivate':
-    get:
+    post:
       summary: Deactivate Account
       operationId: deactivateAccount
       parameters:
@@ -145,7 +145,7 @@ paths:
         '404':
           $ref: '#/components/responses/TransferNotFoundResponse'
   '/transfers/{id}/execute':
-    get:
+    post:
       parameters:
         - name: id
           in: path
@@ -166,7 +166,7 @@ paths:
         '404':
           $ref: '#/components/responses/TransferNotFoundResponse'
   '/transfers/{id}/cancel':
-    get:
+    post:
       parameters:
         - name: id
           in: path

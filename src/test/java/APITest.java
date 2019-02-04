@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import static com.jayway.restassured.RestAssured.get;
+import static com.jayway.restassured.RestAssured.post;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
@@ -93,7 +94,7 @@ public class APITest {
         assertThat(jsonPath.getString("id"), notNullValue());
         assertThat(jsonPath.getString("state"), equalTo("ACTIVE"));
 
-        jsonPath = get(ACCOUNT1_ID + "/deactivate").then()
+        jsonPath = post(ACCOUNT1_ID + "/deactivate").then()
                 .assertThat()
                 .statusCode(200).extract().jsonPath();
 
@@ -184,7 +185,7 @@ public class APITest {
         String executeTransferUrl = getJsonPath.getString("links.find { it.rel=='execute' }.href");
 
         // Execute transfer and check result
-        JsonPath executeJsonPath = get(executeTransferUrl).then()
+        JsonPath executeJsonPath = post(executeTransferUrl).then()
                 .assertThat()
                 .statusCode(200).extract().jsonPath();
 
@@ -211,7 +212,7 @@ public class APITest {
 
         String cancelTransferUrl = getJsonPath.getString("links.find { it.rel=='cancel' }.href");
 
-        JsonPath executeJsonPath = get(cancelTransferUrl).then()
+        JsonPath executeJsonPath = post(cancelTransferUrl).then()
                 .assertThat()
                 .statusCode(200).extract().jsonPath();
 
