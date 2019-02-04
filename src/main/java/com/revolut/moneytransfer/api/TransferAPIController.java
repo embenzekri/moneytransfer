@@ -1,10 +1,8 @@
 package com.revolut.moneytransfer.api;
 
-import com.revolut.moneytransfer.api.schemas.Account;
 import com.revolut.moneytransfer.api.schemas.CreateTransferRequest;
-import com.revolut.moneytransfer.api.schemas.Error;
+import com.revolut.moneytransfer.api.schemas.Link;
 import com.revolut.moneytransfer.api.schemas.Transfer;
-import com.revolut.moneytransfer.entity.AccountEntity;
 import com.revolut.moneytransfer.entity.TransferEntity;
 import com.revolut.moneytransfer.service.AccountService;
 import com.revolut.moneytransfer.service.TransferService;
@@ -12,7 +10,10 @@ import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.api.RequestParameters;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class TransferAPIController {
     private AccountService accountService;
@@ -24,7 +25,9 @@ public class TransferAPIController {
     }
 
     public void listTransfers(RoutingContext routingContext) {
-        successfulResponse(routingContext, transferService.listTransfers());
+        List<Transfer> transferList = transferService.listTransfers().stream().map(this::convertTransfer).collect(Collectors.toList());
+
+        successfulResponse(routingContext, transferList);
     }
 
     public void createTransfer(RoutingContext routingContext) {
@@ -32,47 +35,47 @@ public class TransferAPIController {
 
         CreateTransferRequest createTransferRequest = params.body().getJsonObject().mapTo(CreateTransferRequest.class);
 
-        successfulResponse(routingContext, transferService.createTransfer(createTransferRequest));
+        successfulResponse(routingContext, convertTransfer(transferService.createTransfer(createTransferRequest)));
     }
 
     public void getTransfer(RoutingContext routingContext) {
         String accountId = routingContext.pathParam("id");
-        Optional<Transfer> transfer = transferService.getTransfer(accountId);
+        Optional<TransferEntity> transfer = transferService.getTransfer(accountId);
         if (!transfer.isPresent()) {
             routingContext
                     .response()
                     .setStatusCode(404)
                     .end();
         } else {
-            successfulResponse(routingContext, transfer);
+            successfulResponse(routingContext, convertTransfer(transfer.get()));
         }
     }
 
     public void executeTransfer(RoutingContext routingContext) {
         String transferId = routingContext.pathParam("id");
-        Optional<Transfer> transfer = transferService.getTransfer(transferId);
+        Optional<TransferEntity> transfer = transferService.getTransfer(transferId);
         if (!transfer.isPresent()) {
             routingContext
                     .response()
                     .setStatusCode(404)
                     .end();
         } else {
-            Transfer executedTransfer = transferService.executeTransfer(transferId);
+            TransferEntity executedTransfer = transferService.executeTransfer(transferId);
             successfulResponse(routingContext, executedTransfer);
         }
     }
 
     public void cancelTransfer(RoutingContext routingContext) {
         String transferId = routingContext.pathParam("id");
-        Optional<Transfer> transfer = transferService.getTransfer(transferId);
+        Optional<TransferEntity> transfer = transferService.getTransfer(transferId);
         if (!transfer.isPresent()) {
             routingContext
                     .response()
                     .setStatusCode(404)
                     .end();
         } else {
-            Transfer executedTransfer = transferService.cancelTransfer(transferId);
-            successfulResponse(routingContext, executedTransfer);
+            Optional<TransferEntity> executedTransfer = transferService.cancelTransfer(transferId);
+            successfulResponse(routingContext, convertTransfer(executedTransfer.get()));
         }
     }
 
@@ -83,8 +86,10 @@ public class TransferAPIController {
                 .end(Json.encodePrettily(jsonObject));
     }
 
-
     public Transfer convertTransfer(TransferEntity transferEntity) {
-        return new Transfer(transferEntity.getId(), transferEntity.getFromAccountId(), transferEntity.getToAccountId(), transferEntity.getAmount(), transferEntity.getCurrency(), transferEntity.getState().name());
+        List<Link> links = new ArrayList<>();
+        links.add(new Link(transferEntity.getId() + "/execute", "execute", "POST"));
+        links.add(new Link(transferEntity.getId() + "/cancel", "cancel", "POST"));
+        return new Transfer(transferEntity.getId(), transferEntity.getFromAccountId(), transferEntity.getToAccountId(), transferEntity.getAmount(), transferEntity.getCurrency(), transferEntity.getState().name(), links);
     }
 }

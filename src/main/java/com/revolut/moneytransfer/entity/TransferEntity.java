@@ -2,6 +2,10 @@ package com.revolut.moneytransfer.entity;
 
 import java.math.BigDecimal;
 
+import static com.revolut.moneytransfer.entity.TransferEntity.State.CANCELED;
+import static com.revolut.moneytransfer.entity.TransferEntity.State.COMPLETED;
+import static com.revolut.moneytransfer.entity.TransferEntity.State.FAILED;
+
 public class TransferEntity extends Entity {
 
     private String fromAccountId;
@@ -39,7 +43,20 @@ public class TransferEntity extends Entity {
         return state;
     }
 
+    public TransferEntity executed() {
+        return new TransferEntity(getId(), fromAccountId, toAccountId, amount, currency, COMPLETED);
+    }
+
+    public TransferEntity canceled() {
+        return new TransferEntity(getId(), fromAccountId, toAccountId, amount, currency, CANCELED);
+    }
+
+    public TransferEntity failed() {
+        return new TransferEntity(getId(), fromAccountId, toAccountId, amount, currency, FAILED);
+    }
+
+
     public enum State {
-        PENDING, COMPLETED, CANCELED
+        PENDING, COMPLETED, CANCELED, FAILED
     }
 }

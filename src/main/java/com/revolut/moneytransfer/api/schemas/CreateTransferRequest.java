@@ -1,13 +1,15 @@
 package com.revolut.moneytransfer.api.schemas;
 
-import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL) 
 public class CreateTransferRequest   {
   
+  private String requestId = null;
   private String fromAccountId = null;
   private String toAccountId = null;
   private BigDecimal amount = null;
@@ -17,11 +19,21 @@ public class CreateTransferRequest   {
 
   }
 
-  public CreateTransferRequest (String fromAccountId, String toAccountId, BigDecimal amount, String currency) {
+  public CreateTransferRequest (String requestId, String fromAccountId, String toAccountId, BigDecimal amount, String currency) {
+    this.requestId = requestId;
     this.fromAccountId = fromAccountId;
     this.toAccountId = toAccountId;
     this.amount = amount;
     this.currency = currency;
+  }
+
+    
+  @JsonProperty("requestId")
+  public String getRequestId() {
+    return requestId;
+  }
+  public void setRequestId(String requestId) {
+    this.requestId = requestId;
   }
 
     
@@ -70,7 +82,8 @@ public class CreateTransferRequest   {
       return false;
     }
     CreateTransferRequest createTransferRequest = (CreateTransferRequest) o;
-    return Objects.equals(fromAccountId, createTransferRequest.fromAccountId) &&
+    return Objects.equals(requestId, createTransferRequest.requestId) &&
+        Objects.equals(fromAccountId, createTransferRequest.fromAccountId) &&
         Objects.equals(toAccountId, createTransferRequest.toAccountId) &&
         Objects.equals(amount, createTransferRequest.amount) &&
         Objects.equals(currency, createTransferRequest.currency);
@@ -78,7 +91,7 @@ public class CreateTransferRequest   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(fromAccountId, toAccountId, amount, currency);
+    return Objects.hash(requestId, fromAccountId, toAccountId, amount, currency);
   }
 
   @Override
@@ -86,6 +99,7 @@ public class CreateTransferRequest   {
     StringBuilder sb = new StringBuilder();
     sb.append("class CreateTransferRequest {\n");
     
+    sb.append("    requestId: ").append(toIndentedString(requestId)).append("\n");
     sb.append("    fromAccountId: ").append(toIndentedString(fromAccountId)).append("\n");
     sb.append("    toAccountId: ").append(toIndentedString(toAccountId)).append("\n");
     sb.append("    amount: ").append(toIndentedString(amount)).append("\n");

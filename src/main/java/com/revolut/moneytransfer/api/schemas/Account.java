@@ -1,9 +1,12 @@
 package com.revolut.moneytransfer.api.schemas;
 
-import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL) 
 public class Account   {
@@ -13,17 +16,19 @@ public class Account   {
   private BigDecimal balance = null;
   private String currency = null;
   private String state = null;
+  private List<Link> links = new ArrayList<>();
 
   public Account () {
 
   }
 
-  public Account (String id, String name, BigDecimal balance, String currency, String state) {
+  public Account (String id, String name, BigDecimal balance, String currency, String state, List<Link> links) {
     this.id = id;
     this.name = name;
     this.balance = balance;
     this.currency = currency;
     this.state = state;
+    this.links = links;
   }
 
     
@@ -71,6 +76,15 @@ public class Account   {
     this.state = state;
   }
 
+    
+  @JsonProperty("links")
+  public List<Link> getLinks() {
+    return links;
+  }
+  public void setLinks(List<Link> links) {
+    this.links = links;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -85,12 +99,13 @@ public class Account   {
         Objects.equals(name, account.name) &&
         Objects.equals(balance, account.balance) &&
         Objects.equals(currency, account.currency) &&
-        Objects.equals(state, account.state);
+        Objects.equals(state, account.state) &&
+        Objects.equals(links, account.links);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, balance, currency, state);
+    return Objects.hash(id, name, balance, currency, state, links);
   }
 
   @Override
@@ -103,6 +118,7 @@ public class Account   {
     sb.append("    balance: ").append(toIndentedString(balance)).append("\n");
     sb.append("    currency: ").append(toIndentedString(currency)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
+    sb.append("    links: ").append(toIndentedString(links)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -20,14 +20,16 @@ public class InMemoryStorage implements Storage {
         String account1Id = "/accounts/3fc6b414-cdb8-4b8f-beb5-fb08c2902f87";
         String account2Id = "/accounts/9aecab5d-3827-4624-97a9-11b1207c7a12";
         String account3Id = "/accounts/e9ccb93b-bded-41a3-8e7e-95c3a322a8ee";
+
         accountList.add(new AccountEntity(account1Id, "account1", new BigDecimal(9000), "EUR", ACTIVE));
         accountList.add(new AccountEntity(account2Id, "account2", new BigDecimal(7000), "EUR", ACTIVE));
         accountList.add(new AccountEntity(account3Id, "account3", new BigDecimal(5000), "EUR", ACTIVE));
-
-        accountList.add(new TransferEntity("467c34aa-cef8-bdef-8e7e-1er08c2901e90", account1Id, account2Id, new BigDecimal(1000), "EUR", PENDING));
-        accountList.add(new TransferEntity("467c34aa-cef8-bdef-8e7e-1er08c2901e90", account1Id, account3Id, new BigDecimal(2000), "EUR", COMPLETED));
-
         data.put(EntityName.ACCOUNT, accountList);
+
+        Set<Entity> transferList = new HashSet<>();
+        transferList.add(new TransferEntity("/transfers/467c34aa-cef8-bdef-8e7e-1er08c2901e90", account1Id, account2Id, new BigDecimal(1000), "EUR", PENDING));
+        transferList.add(new TransferEntity("/transfers/816c2a88-7205-4a3b-905b-048af106847d", account1Id, account3Id, new BigDecimal(2000), "EUR", COMPLETED));
+        data.put(EntityName.TRANSFER, transferList);
     }
 
     @Override

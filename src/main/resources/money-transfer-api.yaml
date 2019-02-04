@@ -236,6 +236,10 @@ components:
           type: string
         state:
           type: string
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
     Accounts:
       type: array
       items:
@@ -258,7 +262,9 @@ components:
         state:
           type: string
         links:
-          $ref: '#/components/schemas/Link'
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
     Transfers:
       type: array
       items:

@@ -1,8 +1,9 @@
 package com.revolut.moneytransfer.api.schemas;
 
-import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL) 
 public class Error   {

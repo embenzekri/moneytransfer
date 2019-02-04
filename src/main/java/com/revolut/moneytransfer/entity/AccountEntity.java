@@ -37,7 +37,6 @@ public class AccountEntity extends Entity {
         return new AccountEntity(getId(), name, balance.add(amount), currency, state);
     }
 
-
     public AccountEntity debit(BigDecimal amount) {
         return new AccountEntity(getId(), name, balance.subtract(amount), currency, state);
     }

@@ -10,6 +10,8 @@ import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.api.RequestParameters;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -82,7 +84,9 @@ public class AccountAPIController {
     }
 
     public Account convertAccount(AccountEntity accountEntity) {
-        return new Account(accountEntity.getId(), accountEntity.getName(), accountEntity.getBalance(), accountEntity.getCurrency(), accountEntity.getState().name());
+        List<Link> links = new ArrayList<>();
+        links.add(new Link(accountEntity.getId()+"/deactivate","deactivate","POST"));
+        return new Account(accountEntity.getId(), accountEntity.getName(), accountEntity.getBalance(), accountEntity.getCurrency(), accountEntity.getState().name(),links);
     }
 
 }

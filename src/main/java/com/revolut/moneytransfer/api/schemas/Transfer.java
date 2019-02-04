@@ -1,9 +1,12 @@
 package com.revolut.moneytransfer.api.schemas;
 
-import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL) 
 public class Transfer   {
@@ -14,18 +17,20 @@ public class Transfer   {
   private BigDecimal amount = null;
   private String currency = null;
   private String state = null;
+  private List<Link> links = new ArrayList<>();
 
   public Transfer () {
 
   }
 
-  public Transfer (String id, String fromAccountId, String toAccountId, BigDecimal amount, String currency, String state) {
+  public Transfer (String id, String fromAccountId, String toAccountId, BigDecimal amount, String currency, String state, List<Link> links) {
     this.id = id;
     this.fromAccountId = fromAccountId;
     this.toAccountId = toAccountId;
     this.amount = amount;
     this.currency = currency;
     this.state = state;
+    this.links = links;
   }
 
     
@@ -82,6 +87,15 @@ public class Transfer   {
     this.state = state;
   }
 
+    
+  @JsonProperty("links")
+  public List<Link> getLinks() {
+    return links;
+  }
+  public void setLinks(List<Link> links) {
+    this.links = links;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -97,12 +111,13 @@ public class Transfer   {
         Objects.equals(toAccountId, transfer.toAccountId) &&
         Objects.equals(amount, transfer.amount) &&
         Objects.equals(currency, transfer.currency) &&
-        Objects.equals(state, transfer.state);
+        Objects.equals(state, transfer.state) &&
+        Objects.equals(links, transfer.links);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, fromAccountId, toAccountId, amount, currency, state);
+    return Objects.hash(id, fromAccountId, toAccountId, amount, currency, state, links);
   }
 
   @Override
@@ -116,6 +131,7 @@ public class Transfer   {
     sb.append("    amount: ").append(toIndentedString(amount)).append("\n");
     sb.append("    currency: ").append(toIndentedString(currency)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
+    sb.append("    links: ").append(toIndentedString(links)).append("\n");
     sb.append("}");
     return sb.toString();
   }

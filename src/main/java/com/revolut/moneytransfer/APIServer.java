@@ -47,7 +47,7 @@ public class APIServer extends AbstractVerticle {
                 factory.addHandlerByOperationId("getAccountsTransfers", accountAPIController::listAccountsTransfers);
 
                 factory.addHandlerByOperationId("listTransfers", transferAPIController::listTransfers);
-                factory.addHandlerByOperationId("executeTransfer", transferAPIController::getTransfer);
+                factory.addHandlerByOperationId("getTransfer", transferAPIController::getTransfer);
                 factory.addHandlerByOperationId("createTransfer", transferAPIController::createTransfer);
                 factory.addHandlerByOperationId("executeTransfer", transferAPIController::executeTransfer);
                 factory.addHandlerByOperationId("cancelTransfer", transferAPIController::cancelTransfer);
