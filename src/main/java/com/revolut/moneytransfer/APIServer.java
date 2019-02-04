@@ -55,7 +55,7 @@ public class APIServer extends AbstractVerticle {
                 Router router = factory.getRouter();
 
                 vertx.createHttpServer(new HttpServerOptions()
-                        .setPort(8081))
+                        .setPort(8080))
                         .requestHandler(router::accept)
                         .listen();
 

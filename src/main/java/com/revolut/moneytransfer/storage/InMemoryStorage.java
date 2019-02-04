@@ -14,7 +14,6 @@ import static com.revolut.moneytransfer.entity.TransferEntity.State.PENDING;
 public class InMemoryStorage implements Storage {
     private Map<EntityName, Set<Entity>> data = new HashMap<>();
 
-
     public void dummyData() {
         Set<Entity> accountList = new HashSet<>();
         String account1Id = "/accounts/3fc6b414-cdb8-4b8f-beb5-fb08c2902f87";
@@ -44,6 +43,9 @@ public class InMemoryStorage implements Storage {
 
     @Override
     public Entity save(EntityName entityName, Entity entity) {
+        if (data.get(entityName).contains(entity)) {
+            data.get(entityName).remove(entity);
+        }
         data.get(entityName).add(entity);
         return entity;
     }

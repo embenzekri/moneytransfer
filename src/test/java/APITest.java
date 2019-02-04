@@ -28,7 +28,7 @@ public class APITest {
 
     public static final String TRANSFER1_ID = "/transfers/467c34aa-cef8-bdef-8e7e-1er08c2901e90";
     public static final String TRANSFER2_ID = "/transfers/816c2a88-7205-4a3b-905b-048af106847d";
-    private static int PORT = 8081;
+    private static int PORT = 8080;
 
     private Vertx vertx;
 
