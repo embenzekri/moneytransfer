@@ -18,6 +18,7 @@ import io.vertx.core.json.Json;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
+import io.vertx.ext.web.handler.StaticHandler;
 
 import java.util.function.Function;
 
@@ -49,24 +50,21 @@ public class APIServer extends AbstractVerticle {
 
                         OpenAPI3RouterFactory factory = ar.result();
 
-                        factory.addHandlerByOperationId("listAccounts", accountAPIController::listAccounts);
-                        factory.addHandlerByOperationId("getAccount", accountAPIController::getAccount);
-                        factory.addHandlerByOperationId("createAccount", accountAPIController::createAccount);
-                        factory.addHandlerByOperationId(
-                                "deactivateAccount", accountAPIController::deactivateAccount);
-                        factory.addHandlerByOperationId(
-                                "getAccountsTransfers", accountAPIController::listAccountsTransfers);
+                        factory.addHandlerByOperationId("listAccounts", new APIHandler(accountAPIController::listAccounts));
+                        factory.addHandlerByOperationId("getAccount", new APIHandler(accountAPIController::getAccount));
+                        factory.addHandlerByOperationId("createAccount", new APIHandler(accountAPIController::createAccount));
+                        factory.addHandlerByOperationId("deactivateAccount", new APIHandler(accountAPIController::deactivateAccount));
+                        factory.addHandlerByOperationId("getAccountsTransfers", new APIHandler(accountAPIController::listAccountsTransfers));
 
-                        factory.addHandlerByOperationId("listTransfers", transferAPIController::listTransfers);
-                        factory.addHandlerByOperationId("getTransfer", transferAPIController::getTransfer);
-                        factory.addHandlerByOperationId("createTransfer", transferAPIController::createTransfer);
-                        //factory.addHandlerByOperationId("executeTransfer", transferAPIController::executeTransfer);
-                        factory.addHandlerByOperationId("cancelTransfer", transferAPIController::cancelTransfer);
-
+                        factory.addHandlerByOperationId("listTransfers", new APIHandler(transferAPIController::listTransfers));
+                        factory.addHandlerByOperationId("getTransfer", new APIHandler(transferAPIController::getTransfer));
+                        factory.addHandlerByOperationId("createTransfer", new APIHandler(transferAPIController::createTransfer));
+                        factory.addHandlerByOperationId("cancelTransfer", new APIHandler(transferAPIController::cancelTransfer));
                         factory.addHandlerByOperationId("executeTransfer", new APIHandler(transferAPIController::executeTransfer));
 
                         Router router = factory.getRouter();
-                        //configureRouter(router);
+
+                        configureStaticResources(router);
                         vertx
                                 .createHttpServer(new HttpServerOptions().setPort(8080))
                                 .requestHandler(router::handle)
@@ -85,25 +83,13 @@ public class APIServer extends AbstractVerticle {
         storage.dummyData();
         AccountService accountService = new AccountService(storage);
         TransferService transferService = new TransferService(storage, accountService);
-        accountAPIController = new AccountAPIController(accountService, transferService);
         transferAPIController = new TransferAPIController(transferService);
+        accountAPIController = new AccountAPIController(accountService, transferAPIController);
     }
 
-    /*private void configureRouter(Router router) {
-        router.route().handler(
-                CorsHandler.create(".+")
-                        .maxAgeSeconds(600)
-                        .allowedMethod(HttpMethod.GET)
-                        .allowedMethod(HttpMethod.POST)
-                        .allowedMethod(HttpMethod.PUT)
-                        .allowedMethod(HttpMethod.DELETE)
-                        .allowedMethod(HttpMethod.OPTIONS)
-                        .allowedHeader("Content-Type")
-                        .allowedHeader("Accept")
-                        .allowedHeader("Accept-Language")
-                        .allowedHeader("Authorization"));
+    private void configureStaticResources(Router router) {
         router.route("/*").handler(StaticHandler.create().setCachingEnabled(false));
-    }*/
+    }
 }
 
 class APIHandler implements Handler<RoutingContext> {

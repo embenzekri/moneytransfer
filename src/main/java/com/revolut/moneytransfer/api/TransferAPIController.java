@@ -3,10 +3,10 @@ package com.revolut.moneytransfer.api;
 import com.revolut.moneytransfer.api.schemas.CreateTransferRequest;
 import com.revolut.moneytransfer.api.schemas.Link;
 import com.revolut.moneytransfer.api.schemas.Transfer;
+import com.revolut.moneytransfer.business.entity.AccountEntity;
 import com.revolut.moneytransfer.business.entity.TransferEntity;
 import com.revolut.moneytransfer.business.service.TransferService;
 import com.revolut.moneytransfer.business.service.error.BusinessException;
-import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.api.RequestParameters;
 
@@ -24,33 +24,31 @@ public class TransferAPIController {
         this.transferService = transferService;
     }
 
-    public void listTransfers(RoutingContext routingContext) {
+    public List<Transfer> listTransfers(RoutingContext routingContext) {
         List<Transfer> transferList =
                 transferService.listTransfers().stream()
                         .map(this::convertTransfer)
                         .collect(Collectors.toList());
 
-        successfulResponse(routingContext, transferList);
+        return transferList;
     }
 
-    public void createTransfer(RoutingContext routingContext) {
+    public Transfer createTransfer(RoutingContext routingContext) {
         RequestParameters params = routingContext.get("parsedParameters");
 
         CreateTransferRequest createTransferRequest =
                 params.body().getJsonObject().mapTo(CreateTransferRequest.class);
 
-        successfulResponse(
-                routingContext, convertTransfer(transferService.createTransfer(createTransferRequest)));
+        return convertTransfer(transferService.createTransfer(createTransferRequest));
     }
 
-    public void getTransfer(RoutingContext routingContext) {
-        String accountId = routingContext.pathParam("id");
-        Optional<TransferEntity> transfer = transferService.getTransfer(accountId);
+    public Transfer getTransfer(RoutingContext routingContext) {
+        String transferId = routingContext.pathParam("id");
+        Optional<TransferEntity> transfer = transferService.getTransfer(transferId);
         if (!transfer.isPresent()) {
-            routingContext.response().setStatusCode(404).end();
-        } else {
-            successfulResponse(routingContext, convertTransfer(transfer.get()));
+            throw new BusinessException(TRANSFER_NOT_FOUND);
         }
+        return convertTransfer(transfer.get());
     }
 
     public Transfer executeTransfer(RoutingContext routingContext) {
@@ -58,33 +56,29 @@ public class TransferAPIController {
         Optional<TransferEntity> transfer = transferService.getTransfer(transferId);
         if (!transfer.isPresent()) {
             throw new BusinessException(TRANSFER_NOT_FOUND);
-        } else {
-            TransferEntity executedTransfer = transferService.executeTransfer(transferId);
-            return convertTransfer(executedTransfer);
         }
+        TransferEntity executedTransfer = transferService.executeTransfer(transferId);
+        return convertTransfer(executedTransfer);
     }
 
-    public void cancelTransfer(RoutingContext routingContext) {
+    public Transfer cancelTransfer(RoutingContext routingContext) {
         String transferId = routingContext.pathParam("id");
         Optional<TransferEntity> transfer = transferService.getTransfer(transferId);
         if (!transfer.isPresent()) {
             throw new BusinessException(TRANSFER_NOT_FOUND);
-        } else {
-            Optional<TransferEntity> executedTransfer = transferService.cancelTransfer(transferId);
-            if (!executedTransfer.isPresent()) {
-                throw new BusinessException(TRANSFER_NOT_FOUND);
-            } else {
-                successfulResponse(routingContext, convertTransfer(executedTransfer.get()));
-            }
         }
+        Optional<TransferEntity> executedTransfer = transferService.cancelTransfer(transferId);
+        if (!executedTransfer.isPresent()) {
+            throw new BusinessException(TRANSFER_NOT_FOUND);
+        }
+        return convertTransfer(executedTransfer.get());
     }
 
-    private void successfulResponse(RoutingContext routingContext, Object jsonObject) {
-        routingContext
-                .response()
-                .setStatusCode(200)
-                .putHeader("content-type", "application/json; charset=utf-8")
-                .end(Json.encodePrettily(jsonObject));
+    public List<Transfer> listTransfersByAccount(AccountEntity accountEntity) {
+        return transferService.listTransfers()
+                .stream()
+                .filter(transfer -> accountEntity.matchId(transfer.getFromAccountId())
+                        || accountEntity.matchId(transfer.getToAccountId())).map(this::convertTransfer).collect(Collectors.toList());
     }
 
     public Transfer convertTransfer(TransferEntity transferEntity) {

@@ -37,9 +37,14 @@ public class APITest {
     private Vertx vertx;
 
     @BeforeClass
-    public static void initialize() {
+    public static void staticSetup() {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = PORT;
+    }
+
+    @AfterClass
+    public static void staticTearDown() {
+        RestAssured.reset();
     }
 
     @Before
@@ -51,11 +56,6 @@ public class APITest {
     @After
     public void tearDown(TestContext context) {
         vertx.close(context.asyncAssertSuccess());
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        RestAssured.reset();
     }
 
     @Test

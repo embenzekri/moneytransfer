@@ -187,7 +187,7 @@ paths:
         '404':
           $ref: '#/components/responses/TransferNotFoundResponse'
 servers:
-  - url: 'http://localhost:8080/v1'
+  - url: 'http://localhost:8080'
 components:
   parameters:
     id:
