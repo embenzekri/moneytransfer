@@ -1,4 +1,4 @@
-package com.revolut.moneytransfer.service.error;
+package com.revolut.moneytransfer.business.service.error;
 
 public class BusinessException extends RuntimeException {
     public BusinessException(String message) {

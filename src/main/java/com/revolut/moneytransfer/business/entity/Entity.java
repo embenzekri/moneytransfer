@@ -1,4 +1,4 @@
-package com.revolut.moneytransfer.entity;
+package com.revolut.moneytransfer.business.entity;
 
 import java.util.Objects;
 

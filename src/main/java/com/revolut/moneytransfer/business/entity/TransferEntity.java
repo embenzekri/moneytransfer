@@ -1,10 +1,10 @@
-package com.revolut.moneytransfer.entity;
+package com.revolut.moneytransfer.business.entity;
 
 import java.math.BigDecimal;
 
-import static com.revolut.moneytransfer.entity.TransferEntity.State.CANCELED;
-import static com.revolut.moneytransfer.entity.TransferEntity.State.COMPLETED;
-import static com.revolut.moneytransfer.entity.TransferEntity.State.FAILED;
+import static com.revolut.moneytransfer.business.entity.TransferEntity.State.CANCELED;
+import static com.revolut.moneytransfer.business.entity.TransferEntity.State.COMPLETED;
+import static com.revolut.moneytransfer.business.entity.TransferEntity.State.FAILED;
 
 public class TransferEntity extends Entity {
 

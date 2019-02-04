@@ -1,18 +1,18 @@
 package com.revolut.moneytransfer.storage;
 
-import com.revolut.moneytransfer.entity.AccountEntity;
-import com.revolut.moneytransfer.entity.Entity;
-import com.revolut.moneytransfer.entity.TransferEntity;
+import com.revolut.moneytransfer.business.entity.AccountEntity;
+import com.revolut.moneytransfer.business.entity.Entity;
+import com.revolut.moneytransfer.business.entity.TransferEntity;
 
 import java.math.BigDecimal;
 import java.util.*;
 
-import static com.revolut.moneytransfer.entity.AccountEntity.State.ACTIVE;
-import static com.revolut.moneytransfer.entity.TransferEntity.State.COMPLETED;
-import static com.revolut.moneytransfer.entity.TransferEntity.State.PENDING;
+import static com.revolut.moneytransfer.business.entity.AccountEntity.State.ACTIVE;
+import static com.revolut.moneytransfer.business.entity.TransferEntity.State.COMPLETED;
+import static com.revolut.moneytransfer.business.entity.TransferEntity.State.PENDING;
 
 public class InMemoryStorage implements Storage {
-    private Map<EntityName, Set<Entity>> data = new HashMap<>();
+    private Map<EntityName, Set<Entity>> data = new EnumMap<>(EntityName.class);
 
     public void dummyData() {
         Set<Entity> accountList = new HashSet<>();
@@ -43,9 +43,7 @@ public class InMemoryStorage implements Storage {
 
     @Override
     public Entity save(EntityName entityName, Entity entity) {
-        if (data.get(entityName).contains(entity)) {
-            data.get(entityName).remove(entity);
-        }
+        data.get(entityName).remove(entity);
         data.get(entityName).add(entity);
         return entity;
     }

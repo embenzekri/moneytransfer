@@ -1,13 +1,13 @@
-package com.revolut.moneytransfer.service;
+package com.revolut.moneytransfer.business.service;
 
-import com.revolut.moneytransfer.entity.AccountEntity;
+import com.revolut.moneytransfer.business.entity.AccountEntity;
 import com.revolut.moneytransfer.api.schemas.CreateAccountRequest;
 import com.revolut.moneytransfer.storage.Storage;
 
 import java.util.List;
 import java.util.Optional;
 
-import static com.revolut.moneytransfer.entity.AccountEntity.State.ACTIVE;
+import static com.revolut.moneytransfer.business.entity.AccountEntity.State.ACTIVE;
 import static com.revolut.moneytransfer.storage.Storage.EntityName.ACCOUNT;
 
 public class AccountService {

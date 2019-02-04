@@ -1,4 +1,4 @@
-package com.revolut.moneytransfer.service;
+package com.revolut.moneytransfer.business.service;
 
 import java.util.UUID;
 

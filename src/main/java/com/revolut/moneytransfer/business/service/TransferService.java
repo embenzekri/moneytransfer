@@ -1,9 +1,9 @@
-package com.revolut.moneytransfer.service;
+package com.revolut.moneytransfer.business.service;
 
 import com.revolut.moneytransfer.api.schemas.CreateTransferRequest;
-import com.revolut.moneytransfer.entity.AccountEntity;
-import com.revolut.moneytransfer.entity.TransferEntity;
-import com.revolut.moneytransfer.service.error.BusinessException;
+import com.revolut.moneytransfer.business.entity.AccountEntity;
+import com.revolut.moneytransfer.business.entity.TransferEntity;
+import com.revolut.moneytransfer.business.service.error.BusinessException;
 import com.revolut.moneytransfer.storage.Storage;
 
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.revolut.moneytransfer.entity.TransferEntity.State.PENDING;
+import static com.revolut.moneytransfer.business.entity.TransferEntity.State.PENDING;
 import static com.revolut.moneytransfer.storage.Storage.EntityName.TRANSFER;
 
 public class TransferService {

@@ -187,7 +187,7 @@ paths:
         '404':
           $ref: '#/components/responses/TransferNotFoundResponse'
 servers:
-  - url: 'http://api.ipify.org/'
+  - url: 'http://localhost:8080/'
 components:
   parameters:
     id:

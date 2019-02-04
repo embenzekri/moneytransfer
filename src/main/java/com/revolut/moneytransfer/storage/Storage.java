@@ -1,6 +1,6 @@
 package com.revolut.moneytransfer.storage;
 
-import com.revolut.moneytransfer.entity.Entity;
+import com.revolut.moneytransfer.business.entity.Entity;
 
 import java.util.List;
 import java.util.Optional;

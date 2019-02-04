@@ -5,7 +5,7 @@
     "title": "Money Transfer",
     "version": "v1"
   },
-  "host": "api.ipify.org",
+  "host": "localhost:8080",
   "schemes": [
     "http"
   ],
