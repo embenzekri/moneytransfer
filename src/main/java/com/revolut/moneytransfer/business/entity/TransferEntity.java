@@ -59,6 +59,10 @@ public class TransferEntity extends Entity {
         return new TransferEntity(getId(), fromAccountId, toAccountId, amount, currency, FAILED);
     }
 
+    public boolean isPending() {
+        return state == PENDING;
+    }
+
     public enum State {
         PENDING, COMPLETED, CANCELED, FAILED
     }

@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.revolut.moneytransfer.business.entity.TransferEntity.State.PENDING;
 import static com.revolut.moneytransfer.business.service.error.BusinessFailure.*;
 import static com.revolut.moneytransfer.storage.Storage.EntityName.TRANSFER;
 
@@ -46,6 +45,9 @@ public class TransferService {
         Optional<TransferEntity> transfer = getTransfer(transferId);
         if (!transfer.isPresent()) {
             throw new BusinessException(ACCOUNT_NOT_FOUND);
+        }
+        if (!transfer.get().isPending()) {
+            throw new BusinessException(TRANSFER_STATE_INVALID);
         }
         Optional<AccountEntity> fromAccount = accountService.getAccount(transfer.get().getFromAccountId());
         Optional<AccountEntity> toAccount = accountService.getAccount(transfer.get().getToAccountId());
@@ -83,7 +85,8 @@ public class TransferService {
     public Optional<TransferEntity> cancelTransfer(String transferId) {
         Optional<TransferEntity> transfer = getTransfer(transferId);
         if (transfer.isPresent()) {
-            return Optional.of(transfer.get().canceled());
+            TransferEntity canceledTransfer = transfer.get().canceled();
+            return Optional.of(storage.save(TRANSFER, canceledTransfer));
         }
         return Optional.empty();
     }

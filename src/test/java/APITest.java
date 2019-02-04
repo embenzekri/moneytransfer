@@ -4,6 +4,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import com.revolut.moneytransfer.APIServer;
 import com.revolut.moneytransfer.api.schemas.Account;
 import com.revolut.moneytransfer.api.schemas.CreateTransferRequest;
+import com.revolut.moneytransfer.business.entity.TransferEntity;
 import com.revolut.moneytransfer.business.service.error.BusinessFailure;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
@@ -13,7 +14,6 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.*;
 import org.junit.runner.RunWith;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -30,18 +30,20 @@ public class APITest {
 
     public static final String TRANSFER1_ID = "/transfers/467c34aa-cef8-bdef-8e7e-1er08c2901e90";
     public static final String TRANSFER2_ID = "/transfers/816c2a88-7205-4a3b-905b-048af106847d";
+    public static final String TRANSFER3_ID = "/transfers/2f19240f-57d4-44df-9421-9bfa2e1f9c01";
+
     private static int PORT = 8080;
 
     private Vertx vertx;
 
     @BeforeClass
-    public static void initialize() throws IOException {
+    public static void initialize() {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = PORT;
     }
 
     @Before
-    public void setup(TestContext context) throws IOException {
+    public void setup(TestContext context) {
         vertx = Vertx.vertx();
         vertx.deployVerticle(APIServer.class.getName(), new DeploymentOptions(), context.asyncAssertSuccess());
     }
@@ -109,7 +111,7 @@ public class APITest {
                 .assertThat()
                 .statusCode(200).extract().jsonPath();
 
-        assertThat(jsonPath.getList("").size(), is(2));
+        assertThat(jsonPath.getList("").size(), is(3));
         assertThat(jsonPath.getString("find { it.id=='" + TRANSFER1_ID + "' }.fromAccountId"), is(ACCOUNT1_ID));
         assertThat(jsonPath.getString("find { it.id=='" + TRANSFER1_ID + "' }.toAccountId"), is(ACCOUNT2_ID));
 
@@ -165,7 +167,7 @@ public class APITest {
 
     @Test
     public void testCancelTransfer() {
-        JsonPath getJsonPath = getPendingTransferJsonPath(TRANSFER1_ID);
+        JsonPath getJsonPath = getTransferJsonPathWithState(TRANSFER1_ID, TransferEntity.State.PENDING);
         String cancelTransferUrl = getJsonPath.getString("links.find { it.rel=='cancel' }.href");
 
         JsonPath executeJsonPath = post(cancelTransferUrl).then()
@@ -174,12 +176,33 @@ public class APITest {
 
         assertThat(executeJsonPath.getString("id"), equalTo(TRANSFER1_ID));
         assertThat(executeJsonPath.getString("state"), equalTo("CANCELED"));
+    }
 
+    @Test
+    public void shouldExecutionFailWhenTransferAlreadyCanceled() {
+        JsonPath getJsonPath = getTransferJsonPathWithState(TRANSFER1_ID, TransferEntity.State.PENDING);
+        String cancelTransferUrl = getJsonPath.getString("links.find { it.rel=='cancel' }.href");
+
+        JsonPath cancelJsonPath = post(cancelTransferUrl).then()
+                .assertThat()
+                .statusCode(200).extract().jsonPath();
+
+        assertThat(cancelJsonPath.getString("id"), equalTo(TRANSFER1_ID));
+        assertThat(cancelJsonPath.getString("state"), equalTo("CANCELED"));
+
+        String executeTransferUrl = getJsonPath.getString("links.find { it.rel=='execute' }.href");
+
+        // Execute transfer and check result
+        JsonPath executeJsonPath = post(executeTransferUrl).then()
+                .assertThat()
+                .statusCode(400).extract().jsonPath();
+
+        assertBusinessError(executeJsonPath, BusinessFailure.TRANSFER_STATE_INVALID);
     }
 
     @Test
     public void shouldExecuteTransfer() {
-        JsonPath getJsonPath = getPendingTransferJsonPath(TRANSFER1_ID);
+        JsonPath getJsonPath = getTransferJsonPathWithState(TRANSFER1_ID, TransferEntity.State.PENDING);
 
         // Data before transfer execution
         String fromAccountId = getJsonPath.getString("fromAccountId");
@@ -211,13 +234,11 @@ public class APITest {
     }
 
     @Test
-    public void shouldTransferFailWhenDeactivatedUser() {
+    public void shouldTransferFailWhenUserDeactivated() {
         // Get transfer in pending state
-        JsonPath transferJsonPath = getPendingTransferJsonPath(TRANSFER1_ID);
-
+        JsonPath transferJsonPath = getTransferJsonPathWithState(TRANSFER1_ID, TransferEntity.State.PENDING);
         String fromAccountId = transferJsonPath.getString("fromAccountId");
 
-        // Deactivate the source account
         JsonPath accountJsonPath = post(fromAccountId + "/deactivate").then()
                 .assertThat()
                 .statusCode(200).extract().jsonPath();
@@ -226,7 +247,6 @@ public class APITest {
 
         String executeTransferUrl = transferJsonPath.getString("links.find { it.rel=='execute' }.href");
 
-        // Execute transfer and check that transfer failed
         JsonPath executeJsonPath = post(executeTransferUrl).then()
                 .assertThat()
                 .statusCode(400).extract().jsonPath();
@@ -236,17 +256,28 @@ public class APITest {
 
     @Test
     public void testTransferFailedWhenAmountExceeded() {
-        // Get transfer in pending state
-        JsonPath transferJsonPath = getPendingTransferJsonPath(TRANSFER2_ID);
+        JsonPath transferJsonPath = getTransferJsonPathWithState(TRANSFER2_ID, TransferEntity.State.PENDING);
 
         String executeTransferUrl = transferJsonPath.getString("links.find { it.rel=='execute' }.href");
 
-        // Execute transfer and check that transfer failed
         JsonPath executeJsonPath = post(executeTransferUrl).then()
                 .assertThat()
                 .statusCode(400).extract().jsonPath();
 
         assertBusinessError(executeJsonPath, BusinessFailure.TRANSFER_AMOUNT_EXCEEDED);
+    }
+
+    @Test
+    public void testTransferFailedWhenAlreadyFailed() {
+        JsonPath transferJsonPath = getTransferJsonPathWithState(TRANSFER3_ID, TransferEntity.State.FAILED);
+
+        String executeTransferUrl = transferJsonPath.getString("links.find { it.rel=='execute' }.href");
+
+        JsonPath executeJsonPath = post(executeTransferUrl).then()
+                .assertThat()
+                .statusCode(400).extract().jsonPath();
+
+        assertBusinessError(executeJsonPath, BusinessFailure.TRANSFER_STATE_INVALID);
     }
 
     private void assertBusinessError(JsonPath executeJsonPath, BusinessFailure accountStateInvalid2) {
@@ -255,13 +286,13 @@ public class APITest {
         assertThat(executeJsonPath.getString("message"), equalTo(accountStateInvalid.getMessage()));
     }
 
-    private JsonPath getPendingTransferJsonPath(String transfer1Id) {
+    private JsonPath getTransferJsonPathWithState(String transfer1Id, TransferEntity.State state) {
         JsonPath getJsonPath = get(transfer1Id).then()
                 .assertThat()
                 .statusCode(200).extract().jsonPath();
 
         assertThat(getJsonPath.getString("id"), equalTo(transfer1Id));
-        assertThat(getJsonPath.getString("state"), equalTo("PENDING"));
+        assertThat(getJsonPath.getString("state"), equalTo(state.name()));
         return getJsonPath;
     }
 

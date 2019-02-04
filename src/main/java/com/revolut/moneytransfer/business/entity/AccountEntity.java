@@ -52,7 +52,7 @@ public class AccountEntity extends Entity {
     }
 
     public boolean isActive() {
-        return state.equals(State.ACTIVE);
+        return state == State.ACTIVE;
     }
 
     public enum State {

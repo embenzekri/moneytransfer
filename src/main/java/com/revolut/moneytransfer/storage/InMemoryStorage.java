@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import static com.revolut.moneytransfer.business.entity.AccountEntity.State.ACTIVE;
-import static com.revolut.moneytransfer.business.entity.TransferEntity.State.COMPLETED;
+import static com.revolut.moneytransfer.business.entity.TransferEntity.State.FAILED;
 import static com.revolut.moneytransfer.business.entity.TransferEntity.State.PENDING;
 
 public class InMemoryStorage implements Storage {
@@ -28,6 +28,7 @@ public class InMemoryStorage implements Storage {
         Set<Entity> transferList = new HashSet<>();
         transferList.add(new TransferEntity("/transfers/467c34aa-cef8-bdef-8e7e-1er08c2901e90", account1Id, account2Id, new BigDecimal(1000), "EUR", PENDING));
         transferList.add(new TransferEntity("/transfers/816c2a88-7205-4a3b-905b-048af106847d", account1Id, account3Id, new BigDecimal(10000), "EUR", PENDING));
+        transferList.add(new TransferEntity("/transfers/2f19240f-57d4-44df-9421-9bfa2e1f9c01", account1Id, account3Id, new BigDecimal(3000), "EUR", FAILED));
         data.put(EntityName.TRANSFER, transferList);
     }
 
